@@ -5,10 +5,24 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
+from .forms import PartnerForm
 
 # Create your views here.
 def index(request):
     ctx = {}
+    if request.method == "GET":
+        partner_form = PartnerForm()
+        ctx.update({"form" : partner_form})
+    elif request.method == "POST":
+        partner_form = PartnerForm(request.POST)
+        if partner_form.is_valid():
+            partner = partner_form.save(commit=False)
+            partner.user = request.user
+            partner.save()
+            return redirect("/partner/")
+        else:
+            ctx.update({"form" : partner_form})
+
     return render(request, "index.html", ctx)
 
 def login(request):
