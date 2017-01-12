@@ -61,3 +61,25 @@ def signup(request):
 def logout(request):
     auth_logout(request)
     return redirect("/partner/")
+
+def edit_info(request):
+    ctx = {}
+    # Article.objects.all() # query
+    # partner = Partner.objects.get(user=request.user)
+    if request.method == "GET":
+        partner_form = PartnerForm(instance=request.user.partner)
+        ctx.update({"form" : partner_form})
+    elif request.method == "POST":
+        partner_form = PartnerForm(
+            request.POST,
+            instance=request.user.partner
+        )
+        if partner_form.is_valid():
+            partner = partner_form.save(commit=False)
+            partner.user = request.user
+            partner.save()
+            return redirect("/partner/")
+        else:
+            ctx.update({"form" : partner_form})
+
+    return render(request, "edit_info.html", ctx)

@@ -5,18 +5,49 @@
 <div class="container">
   {% if user.is_authenticated %}
     {% if user.partner %}
-      환영합니다.
-      <div>
-        {{ user.partner.name }}
-      </div>
-      <div>
-        {{ user.partner.contact }}
-      </div>
-      <div>
-        {{ user.partner.address }}
-      </div>
-      <div>
-        {{ user.partner.description }}
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+          <h2>환영합니다.</h2>
+          <table class="table">
+            <tr>
+              <th>
+                업체이름
+              </th>
+              <td>
+                {{ user.partner.name }}
+              </td>
+            </tr>
+            <tr>
+              <th>
+                연락처
+              </th>
+              <td>
+              {{ user.partner.contact }}
+              </td>
+            </tr>
+            <tr>
+              <th>
+                주소
+              </th>
+              <td>
+              {{ user.partner.address }}
+              </td>
+            </tr>
+            <tr>
+              <th>
+                업체 소개
+              </th>
+              <td>
+              {{ user.partner.description }}
+              </td>
+            </tr>
+          </table>
+          <a href="/partner/edit/">
+            <button class="btn btn-default btn-block">
+              수정하기
+            </button>
+          </a>
+        </div>
       </div>
     {% else %}
       추가정보를 입력하세요
