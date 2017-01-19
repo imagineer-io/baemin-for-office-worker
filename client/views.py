@@ -5,7 +5,7 @@ from django.contrib.auth import (
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from partner.models import Partner, Menu
-from client.models import Order
+from client.models import Order, OrderItem
 
 # Create your views here.
 def index(request):
@@ -93,8 +93,14 @@ def order(request, partner_id):
             menu_count = request.POST.get(str(menu.id))
             # if int(menu_count) > 0:
             #     menu_dict.update({ str(menu.id): menu_count })
-            if int(menu_count) > 0:
-                order.items.add(menu)
+            menu_count = int(menu_count)
+            if menu_count > 0:
+                item = OrderItem.objects.create(
+                    order=order,
+                    menu=menu,
+                    count=menu_count
+                )
+                # order.items.add(item)
 
         return redirect("/")
 

@@ -18,4 +18,13 @@ class Order(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    items = models.ManyToManyField(Menu)
+    items = models.ManyToManyField(
+        Menu,
+        through='OrderItem',
+        through_fields=('order', 'menu'),
+    )
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    count = models.PositiveSmallIntegerField()
