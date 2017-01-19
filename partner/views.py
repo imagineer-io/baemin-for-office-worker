@@ -4,10 +4,13 @@ from django.contrib.auth import (
     logout as auth_logout,
 )
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
+
+from client.views import common_login, common_signup
 from .forms import PartnerForm, MenuForm
 from .models import Menu
+
 
 URL_LOGIN = '/partner/login/'
 
@@ -34,40 +37,11 @@ def index(request):
 
 def login(request):
     ctx = {}
-
-    if request.method == "GET":
-        pass
-    elif request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            auth_login(request, user)
-            next_value = request.GET.get("next")
-            if next_value:
-                return redirect(next_value)
-            else:
-                return redirect("/partner/")
-        else:
-            ctx.update({"error" : "사용자가 없습니다."})
-
-    return render(request, "login.html", ctx)
+    return common_login(request, ctx, "partner")
 
 def signup(request):
-    if request.method == "GET":
-        pass
-    elif request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        # print(username, email, password)
-
-        user = User.objects.create_user(username, email, password)
-        # Article.objects.create(title="", content="")
-
     ctx = {}
-    return render(request, "signup.html", ctx)
+    return common_signup(request, ctx, "partner")
 
 def logout(request):
     auth_logout(request)
