@@ -1,7 +1,11 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import (
+    authenticate,
+    login as auth_login,
+)
 from django.contrib.auth.models import User, Group
-from django.shortcuts import render
-from partner.models import Partner
+from django.shortcuts import render, redirect
+from partner.models import Partner, Menu
+from client.models import Order
 
 # Create your views here.
 def index(request):
@@ -20,15 +24,21 @@ def common_login(request, ctx, group):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            if group not in user.groups.all():
+            if group not in [group.name for group in user.groups.all()]:
                 ctx.update({"error" : "접근 권한이 없습니다."})
+                for group in user.groups.all():
+                    print("group:",group)
             else:
                 auth_login(request, user)
                 next_value = request.GET.get("next")
                 if next_value:
                     return redirect(next_value)
                 else:
-                    return redirect("/partner/")
+                    if group == "partner":
+                        return redirect("/partner/")
+                    else:
+                        return redirect("/")
+
         else:
             ctx.update({"error" : "사용자가 없습니다."})
 
@@ -49,7 +59,10 @@ def common_signup(request, ctx, group):
 
         user = User.objects.create_user(username, email, password)
         target_group = Group.objects.get(name=group)
-        user.add(target_group)
+        user.groups.add(target_group)
+
+        if group == "client":
+            Client.objects.create(user=user, name=username)
 
         # Article.objects.create(title="", content="")
     return render(request, "signup.html", ctx)
@@ -57,3 +70,32 @@ def common_signup(request, ctx, group):
 def signup(request):
     ctx = {"is_client":True}
     return common_signup(request, ctx, "client")
+
+def order(request, partner_id):
+    ctx = {}
+    # if request.user.is_anonymous or request.user.partner is None:
+    #     return redirect("/partner/")
+    partner = Partner.objects.get(id=partner_id)
+    menu_list = Menu.objects.filter(partner=partner)
+
+    if request.method == "GET":
+        ctx.update({
+            "partner": partner,
+            "menu_list": menu_list,
+        })
+    elif request.method == "POST":
+        # menu_dict = {}
+        order = Order.objects.create(
+            client=request.user.client,
+            address="test",
+        )
+        for menu in menu_list:
+            menu_count = request.POST.get(str(menu.id))
+            # if int(menu_count) > 0:
+            #     menu_dict.update({ str(menu.id): menu_count })
+            if int(menu_count) > 0:
+                order.items.add(menu)
+
+        return redirect("/")
+
+    return render(request, "order_menu_list.html", ctx)

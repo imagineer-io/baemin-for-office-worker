@@ -48,6 +48,7 @@ def logout(request):
     return redirect("/partner/")
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def edit_info(request):
     ctx = {}
     # Article.objects.all() # query
@@ -71,6 +72,7 @@ def edit_info(request):
     return render(request, "edit_info.html", ctx)
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu(request):
     ctx = {}
     # if request.user.is_anonymous or request.user.partner is None:
@@ -103,12 +105,14 @@ def menu_add(request):
     return render(request, "menu_add.html", ctx)
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_detail(request, menu_id):
     menu = Menu.objects.get(id=menu_id)
     ctx = { "menu" : menu }
     return render(request, "menu_detail.html", ctx)
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_edit(request, menu_id):
     ctx = { "replacement" : "수정" }
     menu = Menu.objects.get(id=menu_id)
@@ -128,6 +132,7 @@ def menu_edit(request, menu_id):
     return render(request, "menu_add.html", ctx)
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_delete(request, menu_id):
     menu = Menu.objects.get(id=menu_id)
     menu.delete()
