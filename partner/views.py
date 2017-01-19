@@ -3,13 +3,16 @@ from django.contrib.auth import (
     login as auth_login,
     logout as auth_logout,
 )
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from .forms import PartnerForm, MenuForm
 from .models import Menu
 
 URL_LOGIN = '/partner/login/'
+
+def partner_group_check(user):
+    return "partner" in user.groups.all()
 
 # Create your views here.
 def index(request):
@@ -104,8 +107,11 @@ def menu(request):
     return render(request, "menu_list.html", ctx)
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_add(request):
     ctx = {}
+    # if "partner" not in request.user.groups.all():
+    #     return redirect("/")
 
     if request.method == "GET":
         form = MenuForm()
