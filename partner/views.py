@@ -8,6 +8,7 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 
 from client.views import common_login, common_signup
+from client.models import OrderItem
 from .forms import PartnerForm, MenuForm
 from .models import Menu
 
@@ -15,7 +16,7 @@ from .models import Menu
 URL_LOGIN = '/partner/login/'
 
 def partner_group_check(user):
-    return "partner" in user.groups.all()
+    return "partner" in [group.name for group in user.groups.all()]
 
 # Create your views here.
 def index(request):
@@ -137,3 +138,16 @@ def menu_delete(request, menu_id):
     menu = Menu.objects.get(id=menu_id)
     menu.delete()
     return redirect("/partner/menu/")
+
+def order(request):
+    ctx = {}
+
+    menu_list = Menu.objects.filter(partner=request.user.partner)
+    item_list = []
+    for menu in menu_list:
+        item_list.extend([
+            item for item in OrderItem.objects.filter(menu=menu)
+        ])
+    order_set = set([item.order for item in item_list])
+    ctx.update({ "order_set" : order_set })
+    return render(request, "order_list_for_partner.html", ctx)
